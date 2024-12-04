@@ -82,6 +82,7 @@ class Node:
                 print(f"  ** Nó {self.node_id} recebeu o valor {value} e termo {term} do líder.")
                 self.term = term
                 self.value = value
+                print(f"  ** Valor {self.value} e Termo {self.term} acordados entre Nó {self.node_id} e o líder.")
 
     def fail(self):
         self.failed = True
