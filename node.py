@@ -42,20 +42,26 @@ class Node:
         self.votes_received = 1
         self.vote_granted = False
 
+        print(f"** Nó {self.node_id} iniciou eleição para o termo {self.term}.")
+
         for node in self.cluster.nodes:
             if node.node_id != self.node_id and not node.failed:
                 node.receive_vote_request(self)
 
         time.sleep(self.election_timeout)
         if self.votes_received > len(self.cluster.nodes) // 2:
+            print(f"** Nó {self.node_id} foi eleito líder para o termo {self.term}.")
             self.state = "leader"
             self.broadcast_value()
+        else:
+            print(f"** Nó {self.node_id} não foi eleito líder para o termo {self.term}.")
 
         self.log_status()
 
     def receive_vote_request(self, candidate):
         with self.lock:
             if self.state == "follower" and candidate.term > self.term and not self.failed:
+                print(f"  ** Nó {self.node_id} recebeu solicitação de voto de Nó {candidate.node_id} para o termo {candidate.term}.")
                 self.term = candidate.term
                 self.state = "follower"
                 self.vote_granted = True
@@ -63,7 +69,14 @@ class Node:
 
     def lead(self):
         while self.state == "leader" and not self.failed:
+            print(f"** Nó {self.node_id} é o líder para o termo {self.term}.")
             time.sleep(self.heartbeat_timeout)
+
+            if random.random() < 0.2:
+                self.state = "follower"
+                print(f"** Líder {self.node_id} falhou em enviar heartbeat. Isso forçará uma nova eleição.")
+                continue 
+
             self.term += 1
             self.value += 1
             self.broadcast_value()
@@ -111,4 +124,3 @@ class Node:
     def log_status(self):
         print(f"\n--- Status do No {self.node_id} ---")
         print(f"Estado = {self.state}, Termo = {self.term}, Valor = {self.value}, Falhou = {self.failed}")
-        print(f"\n--- Nova Iteração ---")

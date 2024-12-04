@@ -18,7 +18,7 @@ def main():
             for node in nodes:
                 node.log_status()
 
-            if random.random() < 0.2:
+            if random.random() < 0.3:
                 node_to_fail = random.choice(nodes)
                 if not node_to_fail.failed:
                     cluster.fail_node(node_to_fail.node_id)
